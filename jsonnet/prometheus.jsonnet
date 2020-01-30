@@ -271,6 +271,23 @@ local namespacesRole = policyRule.new() +
           serviceMonitorSelector: selector.withMatchExpressions({ key: 'k8s-app', operator: 'Exists' }),
           serviceMonitorNamespaceSelector: selector.withMatchExpressions({ key: 'openshift.io/cluster-monitoring', operator: 'Exists' }),
           listenLocal: true,
+          thanos: {
+            baseImage: 'quay.io/thanos/thanos',
+            objectStorageConfig: {
+              key: 'bucket_config.yaml',
+              name: 'thanos-s3'
+            },
+            resources: {
+              limits: {
+                memory: '400Mi'
+              },
+              requests: {
+                cpu: '100m',
+                memory: '200Mi'
+              }
+            },
+            version: 'v0.9.0'
+          },
           containers: [
             {
               name: 'prometheus-proxy',
