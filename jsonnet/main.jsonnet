@@ -167,6 +167,19 @@ local kp = (import 'kube-prometheus/kube-prometheus.libsonnet') +
     );
     utils.mapRuleGroups(replaceKubeletTooManyPodsMessage),
 } + {
+  prometheusAlerts+::
+    local replaceWithLabelCorrectionMessage(rule) = (
+      if ('alert' in rule) && (rule.alert == 'KubeStatefulSetGenerationMismatch') then
+        rule {
+          annotations: {
+            message: 'StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} generation mismatch'
+          },
+        }
+      else
+        rule
+    );
+    utils.mapRuleGroups(replaceWithLabelCorrectionMessage),
+} + {
   // This patches the KubePodCrashLooping alert expression to use 5 minute range
   // https://bugzilla.redhat.com/show_bug.cgi?id=1700195
   prometheusAlerts+::
