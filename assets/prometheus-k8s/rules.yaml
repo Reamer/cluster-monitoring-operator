@@ -422,8 +422,7 @@ spec:
     - alert: CoreDNSDown
       annotations:
         message: CoreDNS has disappeared from Prometheus target discovery.
-      expr: |
-        absent(up{job="kube-dns"} == 1)
+      expr: sum(up) == 0
       for: 15m
       labels:
         severity: critical
@@ -486,8 +485,7 @@ spec:
     - alert: PrometheusOperatorDown
       annotations:
         message: PrometheusOperator has disappeared from Prometheus target discovery.
-      expr: |
-        absent(up{job="prometheus-operator",namespace="openshift-monitoring"} == 1)
+      expr: sum(up) == 0
       for: 15m
       labels:
         severity: critical

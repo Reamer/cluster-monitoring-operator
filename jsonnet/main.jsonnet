@@ -169,6 +169,17 @@ local kp = (import 'kube-prometheus/kube-prometheus.libsonnet') +
     utils.mapRuleGroups(replaceKubeletTooManyPodsMessage),
 } + {
   prometheusAlerts+::
+    local disableRules(rule) = (
+      if ('alert' in rule) && (rule.alert == 'CoreDNSDown' || rule.alert == 'PrometheusOperatorDown') then
+        rule {
+         expr: 'sum(up) == 0',
+        }
+      else
+        rule
+    );
+    utils.mapRuleGroups(disableRules),
+ } + {
+  prometheusAlerts+::
     local replaceWithLabelCorrectionMessage(rule) = (
       if ('alert' in rule) && (rule.alert == 'KubeStatefulSetGenerationMismatch') then
         rule {
