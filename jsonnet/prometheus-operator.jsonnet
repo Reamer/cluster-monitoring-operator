@@ -11,7 +11,7 @@
                 std.map(
                   function(c) c {
                     resources: {},
-                    args+: ['--namespace=' + $._config.namespace],
+                    args+: ['--namespaces=' + $._config.namespace],
                     securityContext: {},
                   },
                   super.containers,

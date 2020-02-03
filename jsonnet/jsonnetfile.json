@@ -14,11 +14,31 @@
       "name": "kube-prometheus",
       "source": {
         "git": {
-          "remote": "https://github.com/coreos/prometheus-operator",
-          "subdir": "contrib/kube-prometheus/jsonnet/kube-prometheus"
+          "remote": "https://github.com/coreos/kube-prometheus",
+          "subdir": "jsonnet/kube-prometheus"
         }
       },
-      "version": "master"
+      "version": "v0.1.0"
+    },
+    {
+      "name": "prometheus-operator",
+      "source": {
+        "git": {
+          "remote": "https://github.com/coreos/prometheus-operator",
+          "subdir": "jsonnet/prometheus-operator"
+        }
+      },
+      "version": "v0.35.0"
+    },
+    {
+      "name": "kubernetes-mixin",
+      "source": {
+          "git": {
+              "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin",
+              "subdir": ""
+          }
+      },
+      "version": "v0.1.0"
     }
   ]
 }

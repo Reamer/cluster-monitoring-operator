@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -18,11 +18,15 @@ spec:
       containers:
       - args:
         - -config=/etc/grafana/grafana.ini
-        image: grafana/grafana:5.2.1
+        image: grafana/grafana:6.0.1
         name: grafana
         ports:
         - containerPort: 3000
           name: http
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
         resources:
           limits:
             cpu: 200m
@@ -58,6 +62,15 @@ spec:
         - mountPath: /grafana-dashboard-definitions/0/k8s-resources-pod
           name: grafana-dashboard-k8s-resources-pod
           readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-workload
+          name: grafana-dashboard-k8s-resources-workload
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/k8s-resources-workloads-namespace
+          name: grafana-dashboard-k8s-resources-workloads-namespace
+          readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/persistentvolumesusage
+          name: grafana-dashboard-persistentvolumesusage
+          readOnly: false
         - mountPath: /etc/grafana
           name: grafana-config
           readOnly: false
@@ -89,6 +102,8 @@ spec:
         - mountPath: /etc/proxy/secrets
           name: secret-grafana-proxy
           readOnly: false
+      nodeSelector:
+        beta.kubernetes.io/os: linux
       securityContext: {}
       serviceAccountName: grafana
       volumes:
@@ -118,6 +133,15 @@ spec:
       - configMap:
           name: grafana-dashboard-k8s-resources-pod
         name: grafana-dashboard-k8s-resources-pod
+      - configMap:
+          name: grafana-dashboard-k8s-resources-workload
+        name: grafana-dashboard-k8s-resources-workload
+      - configMap:
+          name: grafana-dashboard-k8s-resources-workloads-namespace
+        name: grafana-dashboard-k8s-resources-workloads-namespace
+      - configMap:
+          name: grafana-dashboard-persistentvolumesusage
+        name: grafana-dashboard-persistentvolumesusage
       - name: grafana-config
         secret:
           secretName: grafana-config
