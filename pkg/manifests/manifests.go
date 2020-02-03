@@ -974,7 +974,7 @@ func (f *Factory) GrafanaDatasources() (*v1.Secret, error) {
 	}
 
 	d := &GrafanaDatasources{}
-	err = json.Unmarshal(s.Data["prometheus.yaml"], d)
+	err = json.Unmarshal(s.Data["datasources.yaml"], d)
 	if err != nil {
 		return nil, err
 	}
