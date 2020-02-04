@@ -11,6 +11,8 @@ KUBECONFIG?=$(HOME)/.kube/config
 PKGS=$(shell go list ./... | grep -v -E '/vendor/|/test|/examples')
 GOOS=linux
 VERSION=$(shell cat VERSION | tr -d " \t\n\r")
+GO111MODULE?=on
+export GO111MODULE
 SRC=$(shell find . -type f -name '*.go') pkg/manifests/bindata.go
 EMBEDMD_BIN=$(GOPATH)/bin/embedmd
 GOBINDATA_BIN=$(GOPATH)/bin/go-bindata

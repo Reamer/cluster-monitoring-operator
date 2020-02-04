@@ -19,8 +19,9 @@ import (
 	"time"
 
 	"github.com/coreos/prometheus-operator/pkg/alertmanager"
-	"github.com/coreos/prometheus-operator/pkg/client/monitoring"
-	monv1 "github.com/coreos/prometheus-operator/pkg/client/monitoring/v1"
+	mon "github.com/coreos/prometheus-operator/pkg/apis/monitoring"
+	monv1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
+	monitoring "github.com/coreos/prometheus-operator/pkg/client/versioned"
 	"github.com/coreos/prometheus-operator/pkg/k8sutil"
 	prometheusoperator "github.com/coreos/prometheus-operator/pkg/prometheus"
 	"github.com/golang/glog"
@@ -30,7 +31,7 @@ import (
 	openshiftsecurityclientset "github.com/openshift/client-go/security/clientset/versioned"
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1beta2"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	v1betaextensions "k8s.io/api/extensions/v1beta1"
 	rbacv1beta1 "k8s.io/api/rbac/v1beta1"
@@ -64,10 +65,7 @@ func New(namespace string, appVersionName string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	mclient, err := monitoring.NewForConfig(
-		&monv1.DefaultCrdKinds,
-		monv1.Group,
-		cfg)
+	mclient, err := monitoring.NewForConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -118,17 +116,17 @@ func (c *Client) ConfigMapListWatch() *cache.ListWatch {
 
 func (c *Client) WaitForPrometheusOperatorCRDsReady() error {
 	wait.Poll(time.Second, time.Minute*5, func() (bool, error) {
-		err := c.WaitForCRDReady(k8sutil.NewCustomResourceDefinition(monv1.DefaultCrdKinds.Prometheus, monv1.Group, map[string]string{}, false))
+		err := c.WaitForCRDReady(k8sutil.NewCustomResourceDefinition(monv1.DefaultCrdKinds.Prometheus, mon.GroupName, map[string]string{}, false))
 		if err != nil {
 			return false, err
 		}
 
-		err = c.WaitForCRDReady(k8sutil.NewCustomResourceDefinition(monv1.DefaultCrdKinds.Alertmanager, monv1.Group, map[string]string{}, false))
+		err = c.WaitForCRDReady(k8sutil.NewCustomResourceDefinition(monv1.DefaultCrdKinds.Alertmanager, mon.GroupName, map[string]string{}, false))
 		if err != nil {
 			return false, err
 		}
 
-		err = c.WaitForCRDReady(k8sutil.NewCustomResourceDefinition(monv1.DefaultCrdKinds.ServiceMonitor, monv1.Group, map[string]string{}, false))
+		err = c.WaitForCRDReady(k8sutil.NewCustomResourceDefinition(monv1.DefaultCrdKinds.ServiceMonitor, mon.GroupName, map[string]string{}, false))
 		if err != nil {
 			return false, err
 		}
@@ -243,7 +241,7 @@ func (c *Client) DeletePrometheus(p *monv1.Prometheus) error {
 	}
 
 	err = wait.Poll(time.Second*10, time.Minute*10, func() (bool, error) {
-		pods, err := c.KubernetesInterface().Core().Pods(p.GetNamespace()).List(prometheusoperator.ListOptions(p.GetName()))
+		pods, err := c.KubernetesInterface().CoreV1().Pods(p.GetNamespace()).List(prometheusoperator.ListOptions(p.GetName()))
 		if err != nil {
 			return false, errors.Wrap(err, "retrieving pods during polling failed")
 		}
